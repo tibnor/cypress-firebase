@@ -7,6 +7,8 @@ import * as tasks from '../../src/tasks';
 const PROJECTS_COLLECTION = 'projects';
 const PROJECT_ID = 'project-1';
 const PROJECT_PATH = `${PROJECTS_COLLECTION}/${PROJECT_ID}`;
+const SUBPROJECT_ID = 'subproject-1';
+const SUBPROJECT_PATH = `${PROJECT_PATH}/subprojects/${SUBPROJECT_ID}`;
 const testProject = { name: 'project 1' };
 
 const adminApp: any = firebase.initializeAdminApp({
@@ -18,6 +20,7 @@ const projectsFirestoreRef = adminApp
   .firestore()
   .collection(PROJECTS_COLLECTION);
 const projectFirestoreRef = adminApp.firestore().doc(PROJECT_PATH);
+const subprojectFirestoreRef = adminApp.firestore().doc(SUBPROJECT_PATH);
 
 describe('tasks', () => {
   after(async () => {
@@ -459,6 +462,20 @@ describe('tasks', () => {
         expect(result.size).to.equal(0);
       });
 
+      it('deletes a collection, but not subcolletions', async () => {
+        // Add two projects document
+        await projectFirestoreRef.set(testProject);
+        await subprojectFirestoreRef.set(testProject);
+        // Run delete on collection
+        await tasks.callFirestore(adminApp, 'delete', PROJECTS_COLLECTION);
+        const result = await projectsFirestoreRef.get();
+        // Confirm projects collection is empty
+        expect(result.size).to.equal(0);
+
+        const resultSingle = await subprojectFirestoreRef.get();
+        expect(resultSingle.exists).to.be.true;
+      });
+
       it('deletes documents based on a query', async () => {
         const projectToDelete = { name: 'projectToDelete' };
         const projectId = 'projectToDelete';
@@ -484,6 +501,23 @@ describe('tasks', () => {
         const result = await projectFirestoreRef.get();
         // Confirm project is deleted
         expect(result.data()).to.be.undefined;
+      });
+    });
+
+    describe('clear database', () => {
+      it('deletes a collection', async () => {
+        // Add two projects document
+        await projectFirestoreRef.set(testProject);
+        await projectsFirestoreRef.doc('some').set(testProject);
+        await subprojectFirestoreRef.set(testProject);
+        // Run delete on collection
+        await tasks.callFirestore(adminApp, 'clearDb', '');
+        const result = await projectsFirestoreRef.get();
+        // Confirm projects collection is empty
+        expect(result.size).to.equal(0);
+
+        const subResult = await subprojectFirestoreRef.get();
+        expect(subResult.exists).to.be.false;
       });
     });
   });

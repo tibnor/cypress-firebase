@@ -10,6 +10,7 @@ import {
   slashPathToFirestoreRef,
   deleteCollection,
   isDocPath,
+  deleteDatabase,
 } from './firebase-utils';
 
 /**
@@ -258,6 +259,11 @@ export async function callFirestore(
       await deletePromise;
       // Returning null in the case of falsey value prevents Cypress error with message:
       // "You must return a promise, a value, or null to indicate that the task was handled."
+      return null;
+    }
+
+    if (action === 'clearDb') {
+      await deleteDatabase(adminInstance.firestore());
       return null;
     }
 

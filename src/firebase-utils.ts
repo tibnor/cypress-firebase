@@ -300,3 +300,16 @@ export function deleteCollection(
     deleteQueryBatch(db, baseQuery, resolve, reject);
   });
 }
+
+/**
+ * @param db - Firestore instance
+ */
+export async function deleteDatabase(db: firestore.Firestore): Promise<void> {
+  const collections = await db.listCollections();
+  const promises = collections.map(
+    async (collection: firestore.CollectionReference) => {
+      await db.recursiveDelete(collection);
+    },
+  );
+  await Promise.all(promises);
+}

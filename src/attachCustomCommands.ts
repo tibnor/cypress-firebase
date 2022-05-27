@@ -14,7 +14,13 @@ export interface AttachCustomCommandParams {
 /**
  * Action for Firestore
  */
-export type FirestoreAction = 'get' | 'add' | 'set' | 'update' | 'delete';
+export type FirestoreAction =
+  | 'get'
+  | 'add'
+  | 'set'
+  | 'update'
+  | 'delete'
+  | 'clearDb';
 
 /**
  * Data from loaded fixture
