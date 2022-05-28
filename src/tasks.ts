@@ -262,11 +262,6 @@ export async function callFirestore(
       return null;
     }
 
-    if (action === 'clearDb') {
-      await deleteDatabase(adminInstance.firestore());
-      return null;
-    }
-
     if (!data) {
       throw new Error(`You must define data to run ${action} in firestore.`);
     }
@@ -303,6 +298,22 @@ export async function callFirestore(
       `cypress-firebase: Error with Firestore "${action}" at path "${actionPath}" :`,
       err,
     );
+    /* eslint-enable no-console */
+    throw err;
+  }
+}
+
+/**
+ * @param adminInstance - firebase-admin instance
+ * @returns Promise which resolves with results of calling Firestore
+ */
+export async function clearFirestore(adminInstance: app.App): Promise<any> {
+  try {
+    await deleteDatabase(adminInstance.firestore());
+    return null;
+  } catch (err) {
+    /* eslint-disable no-console */
+    console.error(`cypress-firebase: Error with clearing Firestore:`, err);
     /* eslint-enable no-console */
     throw err;
   }

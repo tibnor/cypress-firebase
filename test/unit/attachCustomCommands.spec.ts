@@ -185,6 +185,18 @@ describe('attachCustomCommands', () => {
     });
   });
 
+  describe('cy.clearFirestore', () => {
+    it('Is attached as a custom command', () => {
+      expect(addSpy).to.have.been.calledWith('clearFirestore');
+    });
+
+    it('calls task', async () => {
+      // Return empty auth so logout is resolved
+      await loadedCustomCommands.clearFirestore();
+      expect(taskSpy).to.have.been.calledWith('clearFirestore', {});
+    });
+  });
+
   describe('cy.callRtdb', () => {
     it('Is attached as a custom command', () => {
       expect(addSpy).to.have.been.calledWith('callRtdb');

@@ -8,6 +8,7 @@ import { initializeFirebase } from './firebase-utils';
 type TaskKey =
   | 'callRtdb'
   | 'callFirestore'
+  | 'clearFirestore'
   | 'createCustomToken'
   | 'getAuthUser';
 

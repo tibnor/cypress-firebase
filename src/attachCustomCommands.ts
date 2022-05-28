@@ -14,13 +14,7 @@ export interface AttachCustomCommandParams {
 /**
  * Action for Firestore
  */
-export type FirestoreAction =
-  | 'get'
-  | 'add'
-  | 'set'
-  | 'update'
-  | 'delete'
-  | 'clearDb';
+export type FirestoreAction = 'get' | 'add' | 'set' | 'update' | 'delete';
 
 /**
  * Data from loaded fixture
@@ -250,6 +244,8 @@ declare global {
         dataOrOptions?: FixtureData | string | boolean | CallFirestoreOptions,
         options?: CallFirestoreOptions,
       ) => Chainable;
+
+      clearFirestore: () => Chainable;
     }
   }
 }
@@ -302,6 +298,7 @@ interface CommandNamespacesConfig {
   logout?: string;
   callRtdb?: string;
   callFirestore?: string;
+  clearFirestore?: string;
   getAuthUser?: string;
 }
 
@@ -499,6 +496,18 @@ export default function attachCustomCommands(
       }
       return cy.task('callFirestore', taskSettings);
     },
+  );
+
+  /**
+   * Clear firestore database data
+   * @name cy.clearFirestore
+   * @see https://github.com/prescottprue/cypress-firebase#cygetauthuser
+   * @example
+   * cy.getAuthUser()
+   */
+  Cypress.Commands.add(
+    options?.commandNames?.clearFirestore || 'clearFirestore',
+    (): Promise<any> => cy.task('clearFirestore'),
   );
 
   /**
