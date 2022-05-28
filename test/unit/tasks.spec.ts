@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import * as firebase from '@firebase/rules-unit-testing';
 import * as admin from 'firebase-admin';
 import sinon from 'sinon';
+import axios from 'axios';
 import * as tasks from '../../src/tasks';
 
 const PROJECTS_COLLECTION = 'projects';
@@ -14,6 +15,10 @@ const testProject = { name: 'project 1' };
 const adminApp: any = firebase.initializeAdminApp({
   projectId: process.env.GCLOUD_PROJECT,
   databaseName: process.env.GCLOUD_PROJECT,
+});
+
+const authAdminApp = admin.initializeApp({
+  projectId: process.env.GCLOUD_PROJECT,
 });
 
 const projectsFirestoreRef = adminApp
@@ -503,7 +508,9 @@ describe('tasks', () => {
         expect(result.data()).to.be.undefined;
       });
     });
+  });
 
+  describe('clearFirestore', () => {
     describe('clear database', () => {
       it('deletes a collection', async () => {
         // Add two projects document
@@ -511,7 +518,7 @@ describe('tasks', () => {
         await projectsFirestoreRef.doc('some').set(testProject);
         await subprojectFirestoreRef.set(testProject);
         // Run delete on collection
-        await tasks.callFirestore(adminApp, 'clearDb', '');
+        await tasks.clearFirestore(adminApp);
         const result = await projectsFirestoreRef.get();
         // Confirm projects collection is empty
         expect(result.size).to.equal(0);
@@ -519,6 +526,37 @@ describe('tasks', () => {
         const subResult = await subprojectFirestoreRef.get();
         expect(subResult.exists).to.be.false;
       });
+    });
+  });
+
+  describe('createUser', () => {
+    beforeEach(async () => {
+      await axios.delete(
+        `http://localhost:9099/emulator/v1/projects/demo-project/accounts`,
+      );
+    });
+
+    it('create a user', async () => {
+      const email = 'test@user.com';
+      await tasks.addUser(authAdminApp, { email: 'test@user.com' });
+      const findUser = await authAdminApp.auth().getUserByEmail(email);
+      expect(findUser).to.have.property('email', email);
+    });
+  });
+
+  describe('deleteAllUsers', () => {
+    beforeEach(async () => {
+      await axios.delete(
+        `http://localhost:9099/emulator/v1/projects/demo-project/accounts`,
+      );
+    });
+
+    it('delete a user', async () => {
+      const email = 'test@user.com';
+      authAdminApp.auth().createUser({ email });
+      await tasks.deleteAllUser(authAdminApp);
+      const findUsers = await authAdminApp.auth().listUsers();
+      expect(findUsers.users).to.have.length(0);
     });
   });
 

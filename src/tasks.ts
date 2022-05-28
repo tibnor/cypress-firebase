@@ -1,4 +1,6 @@
 import type { database, firestore, auth, app } from 'firebase-admin';
+import { CreateRequest } from 'firebase-admin/lib/auth/auth-config';
+import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import {
   FixtureData,
   FirestoreAction,
@@ -354,4 +356,33 @@ export function getAuthUser(
   tenantId?: string,
 ): Promise<auth.UserRecord> {
   return getAuth(adminInstance, tenantId).getUser(uid);
+}
+
+/**
+ * Create a Firebase Auth user
+ * @param adminInstance - Admin SDK instance
+ * @param options -
+ * @returns Promise which resolves with a UserRecord
+ */
+export function addUser(
+  adminInstance: any,
+  options: CreateRequest,
+): Promise<UserRecord> {
+  return getAuth(adminInstance).createUser(options);
+}
+
+/**
+ * Delete all Firebase Auth users
+ * @param adminInstance - Admin SDK instance
+ * @returns Promise which resolves if successful delete of all users
+ */
+export function deleteAllUser(adminInstance: any) {
+  return getAuth(adminInstance)
+    .listUsers()
+    .then((listUsersResult) => {
+      const deletePromises = listUsersResult.users.map((user) =>
+        getAuth(adminInstance).deleteUser(user.uid),
+      );
+      return Promise.all(deletePromises);
+    });
 }

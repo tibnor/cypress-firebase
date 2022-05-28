@@ -1,0 +1,8 @@
+{
+  "mochaExplorer.autoload": true,
+  "mochaExplorer.files": "test/**/*.spec.ts",
+  "testing.autoRun.mode": "rerun",
+  "testing.autoRun.delay": 0,
+  "editor.formatOnSave": true,
+  "terminal.integrated.enablePersistentSessions": false
+}

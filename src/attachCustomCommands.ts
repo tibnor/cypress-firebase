@@ -1,4 +1,6 @@
 import type { firestore } from 'firebase-admin';
+import { CreateRequest } from 'firebase-admin/lib/auth/auth-config';
+import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 
 /**
  * Params for attachCustomCommand function for
@@ -246,6 +248,9 @@ declare global {
       ) => Chainable;
 
       clearFirestore: () => Chainable;
+
+      createUser: (option: CreateRequest) => Chainable;
+      deleteAllUsers: () => Chainable;
     }
   }
 }
@@ -300,6 +305,8 @@ interface CommandNamespacesConfig {
   callFirestore?: string;
   clearFirestore?: string;
   getAuthUser?: string;
+  createUser?: string;
+  deleteAllUsers?: string;
 }
 
 interface CustomCommandOptions {
@@ -520,5 +527,16 @@ export default function attachCustomCommands(
   Cypress.Commands.add(
     options?.commandNames?.getAuthUser || 'getAuthUser',
     (uid: string): Promise<any> => cy.task('getAuthUser', uid),
+  );
+
+  Cypress.Commands.add(
+    options?.commandNames?.createUser || 'createUser',
+    (options: CreateRequest): Promise<UserRecord> =>
+      cy.task('createUser', options),
+  );
+
+  Cypress.Commands.add(
+    options?.commandNames?.deleteAllUsers || 'deleteAllUsers',
+    (): Promise<void> => cy.task('deleteAllUsers'),
   );
 }

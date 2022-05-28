@@ -25,7 +25,7 @@ describe('firebase-utils', () => {
       const returnedInstance = {};
       const initializeMock = sinon.spy(() => returnedInstance);
       const settingsMock = sinon.spy();
-      const projectId = 'test-project';
+      const projectId = process.env.GCLOUD_PROJECT;
       const mockCredential = { projectId };
       const adminInstanceMock = {
         initializeApp: initializeMock,
@@ -50,7 +50,7 @@ describe('firebase-utils', () => {
       const initializeMock = sinon.spy(() => returnedInstance);
       const settingsMock = sinon.spy();
       const databaseURL = 'http://localhost:9000?ns=test-namespace';
-      const projectId = 'test-project';
+      const projectId = 'demo-project';
       const adminInstanceMock = {
         initializeApp: initializeMock,
         firestore: sinon.spy(() => ({
