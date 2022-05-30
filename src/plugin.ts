@@ -10,7 +10,9 @@ type TaskKey =
   | 'callFirestore'
   | 'clearFirestore'
   | 'createCustomToken'
-  | 'getAuthUser';
+  | 'getAuthUser'
+  | 'createUser'
+  | 'deleteAllUsers';
 
 /**
  * Cypress plugin which attaches tasks used by custom commands
@@ -40,6 +42,20 @@ export default function pluginWithTasks(
   const tasksWithFirebase: tasksType = Object.keys(tasks).reduce(
     (acc, taskName: string) => {
       (acc as any)[taskName] = (taskSettings: any): any => {
+        if (taskName === 'clearFirestore') {
+          return tasks.clearFirestore(adminInstance);
+        }
+        if (taskName === 'deleteAllUsers') {
+          const projectId =
+            overrideConfig?.projectId || process.env.GCLOUD_PROJECT;
+          if (projectId === undefined) {
+            throw new Error('Cannot find project id');
+          }
+          return tasks.deleteAllUsers(projectId) as any;
+        }
+        if (taskName === 'createUser') {
+          return tasks.createUser(adminInstance, taskSettings);
+        }
         if (taskSettings?.uid) {
           return (tasks as any)[taskName](
             adminInstance,

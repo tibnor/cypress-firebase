@@ -130,7 +130,6 @@ export function initializeFirebase(
         fbConfig.databaseURL = databaseURL;
       }
     }
-
     const fbInstance = adminInstance.initializeApp(fbConfig);
     // Initialize Firestore with emulator host settings
     if (process.env.FIRESTORE_EMULATOR_HOST) {

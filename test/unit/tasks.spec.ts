@@ -538,9 +538,15 @@ describe('tasks', () => {
 
     it('create a user', async () => {
       const email = 'test@user.com';
-      await tasks.addUser(authAdminApp, { email: 'test@user.com' });
+      const response = await tasks.createUser(authAdminApp, {
+        email: 'test@user.com',
+        password: '123456',
+        displayName: 'James Bond',
+      });
+      expect(response.uid).to.be.a('string');
       const findUser = await authAdminApp.auth().getUserByEmail(email);
       expect(findUser).to.have.property('email', email);
+      expect(findUser).to.have.property('displayName', 'James Bond');
     });
   });
 
@@ -551,10 +557,10 @@ describe('tasks', () => {
       );
     });
 
-    it('delete a user', async () => {
+    it('delete all user', async () => {
       const email = 'test@user.com';
-      authAdminApp.auth().createUser({ email });
-      await tasks.deleteAllUser(authAdminApp);
+      await authAdminApp.auth().createUser({ email });
+      await tasks.deleteAllUsers('demo-project');
       const findUsers = await authAdminApp.auth().listUsers();
       expect(findUsers.users).to.have.length(0);
     });

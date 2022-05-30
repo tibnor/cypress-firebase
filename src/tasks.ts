@@ -1,6 +1,7 @@
 import type { database, firestore, auth, app } from 'firebase-admin';
 import { CreateRequest } from 'firebase-admin/lib/auth/auth-config';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
+import axios from 'axios';
 import {
   FixtureData,
   FirestoreAction,
@@ -359,30 +360,47 @@ export function getAuthUser(
 }
 
 /**
+ *
+ */
+function getAuthEmulatorHost() {
+  let host = process.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099';
+  if (!host.startsWith('http')) {
+    host = `http://${host}`;
+  }
+  return host;
+}
+
+/**
  * Create a Firebase Auth user
  * @param adminInstance - Admin SDK instance
  * @param options -
+ * @param options.email
+ * @param options.password
+ * @param options.displayName
  * @returns Promise which resolves with a UserRecord
  */
-export function addUser(
+export async function createUser(
   adminInstance: any,
-  options: CreateRequest,
-): Promise<UserRecord> {
-  return getAuth(adminInstance).createUser(options);
+  options: { email: string; password: string; displayName?: string },
+): Promise<{ uid: string }> {
+  const host = getAuthEmulatorHost();
+  const url = `${host}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=dummy`;
+  const result = await axios.post(url, options);
+  return { uid: result.data.localId };
 }
 
 /**
  * Delete all Firebase Auth users
  * @param adminInstance - Admin SDK instance
+ * @param projectId
  * @returns Promise which resolves if successful delete of all users
  */
-export function deleteAllUser(adminInstance: any) {
-  return getAuth(adminInstance)
-    .listUsers()
-    .then((listUsersResult) => {
-      const deletePromises = listUsersResult.users.map((user) =>
-        getAuth(adminInstance).deleteUser(user.uid),
-      );
-      return Promise.all(deletePromises);
-    });
+export async function deleteAllUsers(projectId: string) {
+  const host = getAuthEmulatorHost();
+  const url = `${host}/emulator/v1/projects/${projectId}/accounts`;
+  const response = await axios.delete(url);
+  if (response.status !== 200) {
+    throw new Error(`Error deleting all users: ${response.status}`);
+  }
+  return response.data;
 }
